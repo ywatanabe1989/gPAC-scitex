@@ -1,0 +1,15 @@
+{
+    "n_permutations": 50.0,
+    "n_phase_bands": 4.0,
+    "n_amplitude_bands": 4.0,
+    "alpha": 0.05,
+    "total_significant": 0.0,
+    "percent_significant": 0.0,
+    "total_fdr_significant": 0.0,
+    "percent_fdr_significant": 0.0,
+    "max_pac_value": 0.5763181447982788,
+    "max_pac_p_value": 0.12,
+    "max_pac_z_score": 1.1566621942720294,
+    "overall_z_score_mean": -4.9382163964265295,
+    "overall_z_score_std": 4.700586833682673
+}

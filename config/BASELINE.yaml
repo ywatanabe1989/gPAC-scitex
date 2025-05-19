@@ -1,0 +1,29 @@
+# Time-stamp: "2025-05-14 05:37:12 (ywatanabe)"
+# File: ./config/BASELINE.yaml
+
+BASELINE:
+  # Signal Size Parameters
+  batch_size: 2
+  n_chs: 2
+  n_segments: 2
+  t_sec: 1
+  fs: 256
+
+  # PAC Resolution Parameters
+  pha_n_bands: 10
+  amp_n_bands: 10
+
+  # Computation Parameters
+  chunk_size: 2
+  n_perm: null
+  fp16: false
+  n_calc: 10
+
+  # MNGS-specific Parameters
+  no_grad: false
+  in_place: false
+  trainable: false
+  device: cpu
+
+  # Tensorpac-specific Parameters
+  use_threads: false
