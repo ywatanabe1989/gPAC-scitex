@@ -1,0 +1,4 @@
+# Time-stamp: "2024-11-04 23:38:38 (ywatanabe)"
+# File: ./torchPAC/config/PACKAGES.yaml
+
+PACKAGES: [mngs, tensorpac]

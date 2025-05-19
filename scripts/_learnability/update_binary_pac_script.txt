@@ -1,0 +1,53 @@
+==== MODIFICATIONS FOR TRAINABLE MODEL SECTION ====
+
+1. Update train_model call to include test_loader:
+```python
+trainable_history = train_model(
+    model=trainable_model,
+    train_loader=train_loader,
+    test_loader=test_loader,  # Added this line
+    n_epochs=n_epochs,
+    learning_rate=learning_rate,
+    device=device,
+)
+```
+
+2. Add frequency band changes plot after feature importance plot:
+```python
+# Plot feature importance
+pha_freqs = trainable_model.pac_module.PHA_MIDS_HZ.cpu().detach().numpy()
+amp_freqs = trainable_model.pac_module.AMP_MIDS_HZ.cpu().detach().numpy()
+plot_feature_importance(
+    trainable_model, 
+    pha_freqs, 
+    amp_freqs,
+    figures_dir / "trainable"
+)
+
+# Plot frequency band changes
+plot_frequency_band_changes(
+    trainable_model,
+    figures_dir / "trainable"
+)
+```
+
+==== MODIFICATIONS FOR FIXED MODEL SECTION ====
+
+1. Update train_model call to include test_loader:
+```python
+fixed_history = train_model(
+    model=fixed_model,
+    train_loader=train_loader,
+    test_loader=test_loader,  # Added this line
+    n_epochs=n_epochs,
+    learning_rate=learning_rate,
+    device=device,
+)
+```
+
+==== INSTRUCTIONS ====
+1. Open the classify_binary_pac_signals.py file
+2. Find the trainable_history = train_model(...) call and update it to include test_loader
+3. Find the section after the feature importance plot in the trainable model section and add the plot_frequency_band_changes code
+4. Find the fixed_history = train_model(...) call and update it to include test_loader
+5. Save the file

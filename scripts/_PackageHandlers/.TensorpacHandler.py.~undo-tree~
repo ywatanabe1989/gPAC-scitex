@@ -1,0 +1,191 @@
+(undo-tree-save-format-version . 1)
+"7bcfd0aaf8a312ed49402809e85f9b161cc0b3e0"
+[nil nil nil nil (26615 1006 125734 559000) 0 nil]
+([nil nil ((#("
+
+# #!/usr/bin/env python3
+# # -*- coding: utf-8 -*-
+# # Time-stamp: \"2024-11-04 15:05:23 (ywatanabe)\"
+# # File: ./torchPAC/scripts/PackageHandlers/TensorpacHandler.py
+
+# \"\"\"
+# This script defines TensorpacHandler.
+# \"\"\"
+
+# # Imports
+# import math
+# from concurrent.futures import ThreadPoolExecutor
+
+# import mngs
+# import numpy as np
+# import tensorpac
+# from scripts.PackageHandlers import BaseHandler
+
+# TIMEOUT_SEC = int(10 * 60)
+
+
+# # Functions
+# class TensorpacHandler(BaseHandler):
+#     def __init__(
+#         self,
+#         seq_len: int,
+#         fs: float,
+#         pha_n_bands: int,
+#         pha_min_hz: float,
+#         pha_max_hz: float,
+#         amp_n_bands: int,
+#         amp_min_hz: float,
+#         amp_max_hz: float,
+#         n_perm: int,
+#         chunk_size: int,
+#         fp16: bool,
+#         in_place: bool,
+#         trainable: bool,
+#         device: str,
+#         use_threads: bool,
+#         ts: mngs.gen.TimeStamper,
+#     ):
+#         # Maintains parameters as attributes by following the BaseHandler's requirements
+#         super().__init__(
+#             seq_len,
+#             fs,
+#             pha_n_bands,
+#             pha_min_hz,
+#             pha_max_hz,
+#             amp_n_bands,
+#             amp_min_hz,
+#             amp_max_hz,
+#             n_perm,
+#             chunk_size,
+#             fp16,
+#             in_place,
+#             trainable,
+#             device,
+#             use_threads,
+#             ts,
+#         )
+
+#         # Explicitly disables unneccessary variables for this class.
+#         # Since parameters are passed using the grid search method, the above parameters should be accepted.
+#         del self.in_place, self.trainable#, self.device
+#         self.ts(self.init_start_str)
+#         self.model = self.init_model()
+#         self.ts(self.init_end_str)
+
+#     def init_model(self) -> tensorpac.Pac:
+#         resolution_dict = {10: \"lres\", 30: \"mres\", 50: \"hres\", 70: \"demon\", 100: \"hulk\"}
+#         model = tensorpac.Pac(
+#             f_pha=resolution_dict[self.pha_n_bands],
+#             f_amp=resolution_dict[self.pha_n_bands],
+#             dcomplex=\"wavelet\",
+#         )
+#         model.idpac = (2, 0, 0)
+#         return model
+
+#     def calc_pac(self, xx: np.ndarray) -> np.ndarray:
+#         return self._calc_pac_unfair_using_threads(xx) if self.use_threads else self._calc_pac_fair_chunk(xx)
+
+#     def _calc_pac(self, xs: np.ndarray) -> np.ndarray:
+#         pha = self.model.filter(self.fs, xs, ftype=\"phase\", n_jobs=-1)
+#         amp = self.model.filter(self.fs, xs, ftype=\"amplitude\", n_jobs=-1)
+#         xpac = self.model.fit(pha, amp, n_jobs=-1, verbose=False)
+#         return xpac.transpose(2, 1, 0)
+
+#     def _calc_pac_fair_chunk(self, xx: np.ndarray) -> np.ndarray:
+#         \"\"\"
+#         xx.shape: (batch_size, n_chs, n_segments, seq_len).
+#         This is suitable for fair comparisons between the MNGS's PAC calculation.
+#         \"\"\"
+
+#         # Ensures the input properties
+#         assert xx.ndim == 4
+#         assert xx.dtype == np.float16 if self.fp16 else np.float32
+
+#         xx = self.dim_handler.fit(xx, keepdims=[-1])  # fixme
+
+#         # Batch processing to limit RAM/VRAM usage
+#         n_chunks = math.ceil(len(xx) / self.chunk_size)
+#         if self.chunk_size == 1:
+#             # (Do not need to add the first dimension for consistency in numpy)
+#             xpac = np.vstack(
+#                 [
+#                     self._calc_pac(
+#                         xx[
+#                             i_batch
+#                             * self.chunk_size : (i_batch + 1)
+#                             * self.chunk_size
+#                         ]
+#                     )
+#                     for i_batch in range(n_chunks)
+#                 ]
+#             )
+#         else:
+#             xpac = np.vstack(
+#                 [
+#                     self._calc_pac(
+#                         xx[
+#                             i_batch
+#                             * self.chunk_size : (i_batch + 1)
+#                             * self.chunk_size
+#                         ]
+#                     )
+#                     for i_batch in range(n_chunks)
+#                 ]
+#             )
+
+#         xpac = self.dim_handler.unfit(xpac)
+
+#         return xpac
+
+#     def _calc_pac_unfair_using_threads(self, xx, n_jobs=-1) -> np.ndarray:
+#         \"\"\"
+#         xx.shape: (batch_size, n_chs, n_segments, seq_len)
+#         This is not suitable for fair comparisons between the MNGS's PAC calculation.
+#         \"\"\"
+
+#         # Ensures the input properties
+#         assert xx.ndim == 4
+#         assert xx.dtype == np.float16 if self.fp16 else np.float32
+
+#         xx = self.dim_handler.fit(xx, keepdims=np.array([-2, -1]))
+
+#         # Processing using threads
+#         batch_size_by_n_chs, n_segments, _ = xx.shape
+#         xpac = []
+#         with ThreadPoolExecutor(
+#             max_workers=None
+#         ) as executor:  # Using system's max processors
+#             futures = []
+#             for i_batch in range(batch_size_by_n_chs):
+#                 futures.append(
+#                     executor.submit(
+#                         self._calc_pac,
+#                         xx[i_batch],
+#                     )
+#                 )
+#             for future in futures:
+#                 xpac.append(future.result())
+
+#         # Collect calculated xpacs
+#         xpac = np.array(xpac)
+#         xpac = self.dim_handler.unfit(xpac)
+
+#         return xpac
+
+#     @property
+#     def freqs_amp(self) -> np.ndarray:
+#         return self.model.f_amp.mean(axis=-1)
+
+#     @property
+#     def freqs_pha(self) -> np.ndarray:
+#         return self.model.f_pha.mean(axis=-1)
+
+#     def __str__(self) -> str:
+#         return \"Tensorpac\"
+
+
+#
+
+" 0 2 (fontified t) 2 4 (face font-lock-comment-delimiter-face fontified t) 4 27 (face font-lock-comment-face fontified t) 27 29 (face font-lock-comment-delimiter-face fontified t) 29 53 (face font-lock-comment-face fontified t) 53 55 (face font-lock-comment-delimiter-face fontified t) 55 103 (face font-lock-comment-face fontified t) 103 105 (face font-lock-comment-delimiter-face fontified t) 105 168 (face font-lock-comment-face fontified t) 168 169 (fontified t) 169 171 (face font-lock-comment-delimiter-face fontified t) 171 175 (face font-lock-comment-face fontified t) 175 177 (face font-lock-comment-delimiter-face fontified t) 177 215 (face font-lock-comment-face fontified t) 215 217 (face font-lock-comment-delimiter-face fontified t) 217 221 (face font-lock-comment-face fontified t) 221 222 (fontified t) 222 224 (face font-lock-comment-delimiter-face fontified t) 224 234 (face font-lock-comment-face fontified t) 234 236 (face font-lock-comment-delimiter-face fontified t) 236 248 (face font-lock-comment-face fontified t) 248 250 (face font-lock-comment-delimiter-face fontified t) 250 300 (face font-lock-comment-face fontified t) 300 301 (fontified t) 301 303 (face font-lock-comment-delimiter-face fontified t) 303 315 (face font-lock-comment-face fontified t) 315 317 (face font-lock-comment-delimiter-face fontified t) 317 336 (face font-lock-comment-face fontified t) 336 338 (face font-lock-comment-delimiter-face fontified t) 338 355 (face font-lock-comment-face fontified t) 355 357 (face font-lock-comment-delimiter-face fontified t) 357 405 (face font-lock-comment-face fontified t) 405 406 (fontified t) 406 408 (face font-lock-comment-delimiter-face fontified t) 408 435 (face font-lock-comment-face fontified t) 435 437 (fontified t) 437 439 (face font-lock-comment-delimiter-face fontified t) 439 451 (face font-lock-comment-face fontified t) 451 453 (face font-lock-comment-delimiter-face fontified t) 453 490 (face font-lock-comment-face fontified t) 490 496 (face font-lock-comment-delimiter-face fontified t) 496 510 (face font-lock-comment-face fontified t) 510 520 (face font-lock-comment-delimiter-face fontified t) 520 526 (face font-lock-comment-face fontified t) 526 536 (face font-lock-comment-delimiter-face fontified t) 536 550 (face font-lock-comment-face fontified t) 550 560 (face font-lock-comment-delimiter-face fontified t) 560 571 (face font-lock-comment-face fontified t) 571 581 (face font-lock-comment-delimiter-face fontified t) 581 599 (face font-lock-comment-face fontified t) 599 609 (face font-lock-comment-delimiter-face fontified t) 609 628 (face font-lock-comment-face fontified t) 628 638 (face font-lock-comment-delimiter-face fontified t) 638 657 (face font-lock-comment-face fontified t) 657 667 (face font-lock-comment-delimiter-face fontified t) 667 685 (face font-lock-comment-face fontified t) 685 695 (face font-lock-comment-delimiter-face fontified t) 695 714 (face font-lock-comment-face fontified t) 714 724 (face font-lock-comment-delimiter-face fontified t) 724 743 (face font-lock-comment-face fontified t) 743 753 (face font-lock-comment-delimiter-face fontified t) 753 766 (face font-lock-comment-face fontified t) 766 776 (face font-lock-comment-delimiter-face fontified t) 776 793 (face font-lock-comment-face fontified t) 793 797 (face font-lock-comment-delimiter-face fontified t) 797 803 (face font-lock-comment-delimiter-face fontified t) 803 815 (face font-lock-comment-face fontified t) 815 825 (face font-lock-comment-delimiter-face fontified t) 825 841 (face font-lock-comment-face fontified t) 841 851 (face font-lock-comment-delimiter-face fontified t) 851 868 (face font-lock-comment-face fontified t) 868 878 (face font-lock-comment-delimiter-face fontified t) 878 891 (face font-lock-comment-face fontified t) 891 901 (face font-lock-comment-delimiter-face fontified t) 901 920 (face font-lock-comment-face fontified t) 920 930 (face font-lock-comment-delimiter-face fontified t) 930 956 (face font-lock-comment-face fontified t) 956 962 (face font-lock-comment-delimiter-face fontified t) 962 965 (face font-lock-comment-face fontified t) 965 975 (face font-lock-comment-delimiter-face fontified t) 975 1056 (face font-lock-comment-face fontified t) 1056 1066 (face font-lock-comment-delimiter-face fontified t) 1066 1084 (face font-lock-comment-face fontified t) 1084 1098 (face font-lock-comment-delimiter-face fontified t) 1098 1107 (face font-lock-comment-face fontified t) 1107 1121 (face font-lock-comment-delimiter-face fontified t) 1121 1125 (face font-lock-comment-face fontified t) 1125 1139 (face font-lock-comment-delimiter-face fontified t) 1139 1152 (face font-lock-comment-face fontified t) 1152 1166 (face font-lock-comment-delimiter-face fontified t) 1166 1178 (face font-lock-comment-face fontified t) 1178 1192 (face font-lock-comment-delimiter-face fontified t) 1192 1204 (face font-lock-comment-face fontified t) 1204 1218 (face font-lock-comment-delimiter-face fontified t) 1218 1231 (face font-lock-comment-face fontified t) 1231 1245 (face font-lock-comment-delimiter-face fontified t) 1245 1257 (face font-lock-comment-face fontified t) 1257 1271 (face font-lock-comment-delimiter-face fontified t) 1271 1283 (face font-lock-comment-face fontified t) 1283 1297 (face font-lock-comment-delimiter-face fontified t) 1297 1305 (face font-lock-comment-face fontified t) 1305 1319 (face font-lock-comment-delimiter-face fontified t) 1319 1331 (face font-lock-comment-face fontified t) 1331 1345 (face font-lock-comment-delimiter-face fontified t) 1345 1351 (face font-lock-comment-face fontified t) 1351 1365 (face font-lock-comment-delimiter-face fontified t) 1365 1375 (face font-lock-comment-face fontified t) 1375 1389 (face font-lock-comment-delimiter-face fontified t) 1389 1400 (face font-lock-comment-face fontified t) 1400 1414 (face font-lock-comment-delimiter-face fontified t) 1414 1422 (face font-lock-comment-face fontified t) 1422 1436 (face font-lock-comment-delimiter-face fontified t) 1436 1449 (face font-lock-comment-face fontified t) 1449 1463 (face font-lock-comment-delimiter-face fontified t) 1463 1467 (face font-lock-comment-face fontified t) 1467 1477 (face font-lock-comment-delimiter-face fontified t) 1477 1479 (face font-lock-comment-face fontified t) 1479 1480 (fontified t) 1480 1490 (face font-lock-comment-delimiter-face fontified t) 1490 1551 (face font-lock-comment-face fontified t) 1551 1561 (face font-lock-comment-delimiter-face fontified t) 1561 1662 (face font-lock-comment-face fontified t) 1662 1672 (face font-lock-comment-delimiter-face fontified t) 1672 1720 (face font-lock-comment-face fontified t) 1720 1730 (face font-lock-comment-delimiter-face fontified t) 1730 1759 (face font-lock-comment-face fontified t) 1759 1769 (face font-lock-comment-delimiter-face fontified t) 1769 1800 (face font-lock-comment-face fontified t) 1800 1810 (face font-lock-comment-delimiter-face fontified t) 1810 1837 (face font-lock-comment-face fontified t) 1837 1838 (fontified t) 1838 1844 (face font-lock-comment-delimiter-face fontified t) 1844 1883 (face font-lock-comment-face fontified t) 1883 1893 (face font-lock-comment-delimiter-face fontified t) 1893 1974 (face font-lock-comment-face fontified t) 1974 1984 (face font-lock-comment-delimiter-face fontified t) 1984 2007 (face font-lock-comment-face fontified t) 2007 2021 (face font-lock-comment-delimiter-face fontified t) 2021 2062 (face font-lock-comment-face fontified t) 2062 2076 (face font-lock-comment-delimiter-face fontified t) 2076 2117 (face font-lock-comment-face fontified t) 2117 2131 (face font-lock-comment-delimiter-face fontified t) 2131 2151 (face font-lock-comment-face fontified t) 2151 2161 (face font-lock-comment-delimiter-face fontified t) 2161 2163 (face font-lock-comment-face fontified t) 2163 2173 (face font-lock-comment-delimiter-face fontified t) 2173 2197 (face font-lock-comment-face fontified t) 2197 2207 (face font-lock-comment-delimiter-face fontified t) 2207 2220 (face font-lock-comment-face fontified t) 2220 2221 (fontified t) 2221 2227 (face font-lock-comment-delimiter-face fontified t) 2227 2277 (face font-lock-comment-face fontified t) 2277 2287 (face font-lock-comment-delimiter-face fontified t) 2287 2315 (face font-lock-comment-face fontified t) 2315 2389 (face font-lock-comment-face fontified t) 2389 3843 (fontified nil) 3843 3861 (face font-lock-comment-delimiter-face fontified t) 3861 3863 (face font-lock-comment-face fontified t) 3863 3885 (face font-lock-comment-delimiter-face fontified t) 3885 3901 (face font-lock-comment-face fontified t) 3901 3927 (face font-lock-comment-delimiter-face fontified t) 3927 3931 (face font-lock-comment-face fontified t) 3931 3961 (face font-lock-comment-delimiter-face fontified t) 3961 3969 (face font-lock-comment-face fontified t) 3969 3999 (face font-lock-comment-delimiter-face fontified t) 3999 4033 (face font-lock-comment-face fontified t) 4033 4063 (face font-lock-comment-delimiter-face fontified t) 4063 4081 (face font-lock-comment-face fontified t) 4081 4107 (face font-lock-comment-delimiter-face fontified t) 4107 4109 (face font-lock-comment-face fontified t) 4109 4131 (face font-lock-comment-delimiter-face fontified t) 4131 4133 (face font-lock-comment-face fontified t) 4133 4155 (face font-lock-comment-delimiter-face fontified t) 4155 4186 (face font-lock-comment-face fontified t) 4186 4204 (face font-lock-comment-delimiter-face fontified t) 4204 4206 (face font-lock-comment-face fontified t) 4206 4220 (face font-lock-comment-delimiter-face fontified t) 4220 4222 (face font-lock-comment-face fontified t) 4222 4223 (fontified t) 4223 4233 (face font-lock-comment-delimiter-face fontified t) 4233 4269 (face font-lock-comment-face fontified t) 4269 4270 (fontified t) 4270 4280 (face font-lock-comment-delimiter-face fontified t) 4280 4292 (face font-lock-comment-face fontified t) 4292 4293 (fontified t) 4293 4299 (face font-lock-comment-delimiter-face fontified t) 4299 4370 (face font-lock-comment-face fontified t) 4370 4380 (face font-lock-comment-delimiter-face fontified t) 4380 4384 (face font-lock-comment-face fontified t) 4384 4394 (face font-lock-comment-delimiter-face fontified t) 4394 4445 (face font-lock-comment-face fontified t) 4445 4455 (face font-lock-comment-delimiter-face fontified t) 4455 4533 (face font-lock-comment-face fontified t) 4533 4543 (face font-lock-comment-delimiter-face fontified t) 4543 4547 (face font-lock-comment-face fontified t) 4547 4548 (fontified t) 4548 4558 (face font-lock-comment-delimiter-face fontified t) 4558 4589 (face font-lock-comment-face fontified t) 4589 4599 (face font-lock-comment-delimiter-face fontified t) 4599 4619 (face font-lock-comment-face fontified t) 4619 4629 (face font-lock-comment-delimiter-face fontified t) 4629 4688 (face font-lock-comment-face fontified t) 4688 4689 (fontified t) 4689 4699 (face font-lock-comment-delimiter-face fontified t) 4699 4758 (face font-lock-comment-face fontified t) 4758 4759 (fontified t) 4759 4769 (face font-lock-comment-delimiter-face fontified t) 4769 4796 (face font-lock-comment-face fontified t) 4796 4806 (face font-lock-comment-delimiter-face fontified t) 4806 4852 (face font-lock-comment-face fontified t) 4852 4862 (face font-lock-comment-delimiter-face fontified t) 4862 4872 (face font-lock-comment-face fontified t) 4872 4882 (face font-lock-comment-delimiter-face fontified t) 4882 4907 (face font-lock-comment-face fontified t) 4907 4921 (face font-lock-comment-delimiter-face fontified t) 4921 4938 (face font-lock-comment-face fontified t) 4938 4948 (face font-lock-comment-delimiter-face fontified t) 4948 4996 (face font-lock-comment-face fontified t) 4996 5010 (face font-lock-comment-delimiter-face fontified t) 5010 5023 (face font-lock-comment-face fontified t) 5023 5037 (face font-lock-comment-delimiter-face fontified t) 5037 5080 (face font-lock-comment-face fontified t) 5080 5098 (face font-lock-comment-delimiter-face fontified t) 5098 5114 (face font-lock-comment-face fontified t) 5114 5136 (face font-lock-comment-delimiter-face fontified t) 5136 5153 (face font-lock-comment-face fontified t) 5153 5179 (face font-lock-comment-delimiter-face fontified t) 5179 5195 (face font-lock-comment-face fontified t) 5195 5221 (face font-lock-comment-delimiter-face fontified t) 5221 5234 (face font-lock-comment-face fontified t) 5234 5256 (face font-lock-comment-delimiter-face fontified t) 5256 5258 (face font-lock-comment-face fontified t) 5258 5276 (face font-lock-comment-delimiter-face fontified t) 5276 5278 (face font-lock-comment-face fontified t) 5278 5292 (face font-lock-comment-delimiter-face fontified t) 5292 5315 (face font-lock-comment-face fontified t) 5315 5333 (face font-lock-comment-delimiter-face fontified t) 5333 5343 (face font-lock-comment-face fontified t) 5343 5362 (face font-lock-comment-face fontified t) 5362 5363 (fontified t) 5363 5373 (face font-lock-comment-delimiter-face fontified t) 5373 5400 (face font-lock-comment-face fontified t) 5400 5410 (face font-lock-comment-delimiter-face fontified t) 5410 5432 (face font-lock-comment-face fontified t) 5432 5442 (face font-lock-comment-delimiter-face fontified t) 5442 5478 (face font-lock-comment-face fontified t) 5478 5479 (fontified t) 5479 5489 (face font-lock-comment-delimiter-face fontified t) 5489 5501 (face font-lock-comment-face fontified t) 5501 5502 (fontified t) 5502 5508 (face font-lock-comment-delimiter-face fontified t) 5508 5518 (face font-lock-comment-face fontified t) 5518 5524 (face font-lock-comment-delimiter-face fontified t) 5524 5559 (face font-lock-comment-face fontified t) 5559 5569 (face font-lock-comment-delimiter-face fontified t) 5569 5607 (face font-lock-comment-face fontified t) 5607 5608 (fontified t) 5608 5614 (face font-lock-comment-delimiter-face fontified t) 5614 5624 (face font-lock-comment-face fontified t) 5624 5630 (face font-lock-comment-delimiter-face fontified t) 5630 5665 (face font-lock-comment-face fontified t) 5665 5675 (face font-lock-comment-delimiter-face fontified t) 5675 5713 (face font-lock-comment-face fontified t) 5713 5714 (fontified t) 5714 5720 (face font-lock-comment-delimiter-face fontified t) 5720 5746 (face font-lock-comment-face fontified t) 5746 5756 (face font-lock-comment-delimiter-face fontified t) 5756 5775 (face font-lock-comment-face fontified t) 5775 5777 (fontified t) 5777 5778 (face font-lock-comment-delimiter-face fontified t) 5778 5779 (face font-lock-comment-face fontified t) 5779 5780 (fontified t)) . 5276) (undo-tree-id0 . -3843) (undo-tree-id1 . -1) (undo-tree-id2 . -1) (undo-tree-id3 . -1) (undo-tree-id4 . -103) (undo-tree-id5 . -103) (undo-tree-id6 . -103) (undo-tree-id7 . -103) (undo-tree-id8 . -103) (undo-tree-id9 . -103) (undo-tree-id10 . -103) (undo-tree-id11 . -103) (undo-tree-id12 . -103) (undo-tree-id13 . -103) (undo-tree-id14 . -103) (undo-tree-id15 . -103) (undo-tree-id16 . -103) (undo-tree-id17 . -103) (undo-tree-id18 . -103) (undo-tree-id19 . -103) (undo-tree-id20 . -103) (undo-tree-id21 . -103) (undo-tree-id22 . -103) (undo-tree-id23 . -103) (undo-tree-id24 . -103) (undo-tree-id25 . -103) (undo-tree-id26 . -103) (undo-tree-id27 . -103) (undo-tree-id28 . -103) (undo-tree-id29 . -103) (undo-tree-id30 . -103) (undo-tree-id31 . -53) (undo-tree-id32 . -53) (undo-tree-id33 . -53) (undo-tree-id34 . -53) (undo-tree-id35 . -53) (undo-tree-id36 . -53) (undo-tree-id37 . -53) (undo-tree-id38 . -53) (undo-tree-id39 . -53) (undo-tree-id40 . -53) (undo-tree-id41 . -53) (undo-tree-id42 . -53) (undo-tree-id43 . -53) (undo-tree-id44 . -53) (undo-tree-id45 . -53) (undo-tree-id46 . -53) (undo-tree-id47 . -53) (undo-tree-id48 . -27) (undo-tree-id49 . -27) (undo-tree-id50 . -27) (undo-tree-id51 . -27) (undo-tree-id52 . -27) (undo-tree-id53 . -27) (undo-tree-id54 . -27) (undo-tree-id55 . -27) (undo-tree-id56 . -27) (undo-tree-id57 . -27) (undo-tree-id58 . -27) (undo-tree-id59 . -2) (undo-tree-id60 . -2) (undo-tree-id61 . -2) (undo-tree-id62 . -2) (undo-tree-id63 . -2) (undo-tree-id64 . -2) (undo-tree-id65 . -2) (undo-tree-id66 . -2) (undo-tree-id67 . -2) (undo-tree-id68 . -2) (undo-tree-id69 . -2) (undo-tree-id70 . -1) (undo-tree-id71 . -1) (undo-tree-id72 . -1) (undo-tree-id73 . -1) (undo-tree-id74 . -1) (undo-tree-id75 . -1) (undo-tree-id76 . -1) (undo-tree-id77 . -1) (undo-tree-id78 . -1) (undo-tree-id79 . -1) (undo-tree-id80 . -1) (undo-tree-id81 . -1) (undo-tree-id82 . -1) (undo-tree-id83 . -1) (undo-tree-id84 . -1) (undo-tree-id85 . -1) (undo-tree-id86 . -1) (undo-tree-id87 . -1) (undo-tree-id88 . -1) (undo-tree-id89 . -1) (undo-tree-id90 . -1) (undo-tree-id91 . -1) (undo-tree-id92 . -1) (undo-tree-id93 . -1) (undo-tree-id94 . -1) (undo-tree-id95 . -1) (undo-tree-id96 . -5779) (undo-tree-id97 . -5780) (undo-tree-id98 . -5780) (undo-tree-id99 . -5780) (undo-tree-id100 . -5780) (undo-tree-id101 . -5780) (undo-tree-id102 . -5780) (undo-tree-id103 . -5780) (undo-tree-id104 . -5780) (undo-tree-id105 . -5780) (undo-tree-id106 . -5780) (undo-tree-id107 . -5780) (undo-tree-id108 . -5780) (undo-tree-id109 . -5780) (undo-tree-id110 . -5780) (undo-tree-id111 . -5780) (undo-tree-id112 . -5780) (undo-tree-id113 . -5780) (undo-tree-id114 . -5780) (undo-tree-id115 . -5780) (undo-tree-id116 . -5780) (undo-tree-id117 . -5780) (undo-tree-id118 . -5780) (undo-tree-id119 . -5780) (undo-tree-id120 . -5780) (undo-tree-id121 . -5780) (undo-tree-id122 . -5780) (undo-tree-id123 . -5780) (undo-tree-id124 . -5780) (undo-tree-id125 . -5780) (undo-tree-id126 . -5780) (undo-tree-id127 . -5780) 11056 (t 26615 848 0 0)) nil (26615 1006 125717 802000) 0 nil])
+([nil current ((nil fontified t 1088 . 1094) (nil face font-lock-keyword-face 1088 . 1094) (#("import" 0 6 (face font-lock-keyword-face fontified t)) . -1088) (1094 . 1100) (nil fontified t 1042 . 1048) (nil face font-lock-keyword-face 1042 . 1048) (#("import" 0 6 (face font-lock-keyword-face fontified t)) . -1042) (1048 . 1054) (nil fontified t 1023 . 1029) (nil face font-lock-keyword-face 1023 . 1029) (#("import" 0 6 (face font-lock-keyword-face fontified t)) . -1023) (1029 . 1035) (nil fontified t 1011 . 1017) (nil face font-lock-keyword-face 1011 . 1017) (#("import" 0 6 (face font-lock-keyword-face fontified t)) . -1011) (1017 . 1023) (nil fontified t 984 . 990) (nil face font-lock-keyword-face 984 . 990) (#("import" 0 6 (face font-lock-keyword-face fontified t)) . -984) (990 . 996) (nil fontified t 948 . 954) (nil face font-lock-keyword-face 948 . 954) (#("import" 0 6 (face font-lock-keyword-face fontified t)) . -948) (954 . 960) (#("import" 0 6 (fontified nil)) . -224) (230 . 236) (5687 . 5693) (1 . 412) 5276) nil (26615 1006 123695 388000) 0 nil])
+nil

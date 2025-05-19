@@ -1,0 +1,3 @@
+model,phase_accuracy,amplitude_accuracy,n_samples
+Trainable gPAC,1.0,1.0,54
+Fixed gPAC,1.0,1.0,54

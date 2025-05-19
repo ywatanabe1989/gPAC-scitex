@@ -1,0 +1,7 @@
+# Timestamp: "2025-05-14 04:07:43 (ywatanabe)"
+# File: /ssh:sp:/home/ywatanabe/proj/gPAC/config/DEMO_SIGNAL.yaml
+
+DEMO_SIGNAL:
+  N_CLASSES: 5
+
+# EOF

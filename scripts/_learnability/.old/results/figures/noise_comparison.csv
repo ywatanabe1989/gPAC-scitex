@@ -1,0 +1,4 @@
+noise_level,trainable_pha_acc,trainable_amp_acc,fixed_pha_acc,fixed_amp_acc
+0.1,1.0,1.0,1.0,1.0
+0.2,1.0,1.0,1.0,1.0
+0.3,1.0,1.0,1.0,1.0
