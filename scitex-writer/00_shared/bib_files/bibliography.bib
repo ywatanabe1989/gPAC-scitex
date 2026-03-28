@@ -1,4 +1,7 @@
-%% Migrated from paper/manuscript/src/bibliography.bib
+% ============================================================
+% Existing references
+% ============================================================
+
 @article{combrisson_tensorpac_2020,
     title = {Tensorpac: {An} open-source {Python} toolbox for tensor-based phase-amplitude coupling measurement in electrophysiological brain signals},
     volume = {16},
@@ -16,14 +19,176 @@
     pages = {e1008302},
 }
 
+% ============================================================
+% PAC methodology
+% ============================================================
+
+@article{canolty_high_2006,
+    title = {High gamma power is phase-locked to theta oscillations in human neocortex},
+    volume = {313},
+    doi = {10.1126/science.1128115},
+    number = {5793},
+    journal = {Science},
+    author = {Canolty, Ryan T. and Edwards, Erik and Dalal, Sarang S. and Soltani, Maryam and Nagarajan, Srikantan S. and Kirsch, Heidi E. and Berger, Mitchel S. and Barbaro, Nicholas M. and Knight, Robert T.},
+    year = {2006},
+    pages = {1626--1628},
+}
+
+@article{tort_measuring_2010,
+    title = {Measuring phase-amplitude coupling between neuronal oscillations of different frequencies},
+    volume = {104},
+    doi = {10.1152/jn.00106.2010},
+    number = {2},
+    journal = {Journal of Neurophysiology},
+    author = {Tort, Adriano B. L. and Komorowski, Robert and Eichenbaum, Howard and Kopell, Nancy},
+    year = {2010},
+    pages = {1195--1210},
+}
+
+% NOTE: Verify DOI and page numbers before submission.
+@article{ozkurt_statistically_2011,
+    title = {A critical note on the definition of phase-amplitude cross-frequency coupling},
+    volume = {201},
+    doi = {10.1016/j.jneumeth.2011.07.014},
+    number = {2},
+    journal = {Journal of Neuroscience Methods},
+    author = {{\"O}zkurt, Tolga Esat and Schnitzler, Alfons},
+    year = {2011},
+    pages = {438--443},
+}
+
+% ============================================================
+% Neural oscillations and cross-frequency coupling
+% ============================================================
+
+@article{buzsaki_neuronal_2004,
+    title = {Neuronal oscillations in cortical networks},
+    volume = {304},
+    doi = {10.1126/science.1099745},
+    number = {5679},
+    journal = {Science},
+    author = {Buzs{\'a}ki, Gy{\"o}rgy and Draguhn, Andreas},
+    year = {2004},
+    pages = {1926--1929},
+}
+
+@article{jensen_cross_2007,
+    title = {Cross-frequency coupling between neuronal oscillations},
+    volume = {11},
+    doi = {10.1016/j.tics.2007.05.003},
+    number = {7},
+    journal = {Trends in Cognitive Sciences},
+    author = {Jensen, Ole and Colgin, Laura L.},
+    year = {2007},
+    pages = {267--269},
+}
+
+% ============================================================
+% Memory consolidation and hippocampal ripples
+% ============================================================
+
+@article{girardeau_selective_2009,
+    title = {Selective suppression of hippocampal ripples impairs spatial memory},
+    volume = {12},
+    doi = {10.1038/nn.2384},
+    number = {10},
+    journal = {Nature Neuroscience},
+    author = {Girardeau, Gabrielle and Benchenane, Karim and Wiener, Sidney I. and Buzs{\'a}ki, Gy{\"o}rgy and Zugaro, Michael B.},
+    year = {2009},
+    pages = {1222--1223},
+}
+
+@article{buzsaki_hippocampal_2015,
+    title = {Hippocampal sharp wave-ripple: {A} cognitive biomarker for episodic memory and planning},
+    volume = {25},
+    doi = {10.1002/hipo.22488},
+    number = {10},
+    journal = {Hippocampus},
+    author = {Buzs{\'a}ki, Gy{\"o}rgy},
+    year = {2015},
+    pages = {1073--1188},
+}
+
+% ============================================================
+% Phase precession
+% ============================================================
+
+@article{okeefe_phase_1993,
+    title = {Phase relationship between hippocampal place units and the {EEG} theta rhythm},
+    volume = {3},
+    doi = {10.1002/hipo.450030307},
+    number = {3},
+    journal = {Hippocampus},
+    author = {O'Keefe, John and Recce, Michael L.},
+    year = {1993},
+    pages = {317--330},
+}
+
+% ============================================================
+% Brain-computer interfaces
+% ============================================================
+
+@article{wolpaw_bci_2002,
+    title = {Brain-computer interfaces for communication and control},
+    volume = {113},
+    doi = {10.1016/S1388-2457(02)00057-3},
+    number = {6},
+    journal = {Clinical Neurophysiology},
+    author = {Wolpaw, Jonathan R. and Birbaumer, Niels and McFarland, Dennis J. and Pfurtscheller, Gert and Vaughan, Theresa M.},
+    year = {2002},
+    pages = {767--791},
+}
+
+% ============================================================
+% PyTorch
+% ============================================================
+
+@inproceedings{paszke_pytorch_2019,
+    title = {{PyTorch}: {An} Imperative Style, High-Performance Deep Learning Library},
+    booktitle = {Advances in Neural Information Processing Systems 32},
+    author = {Paszke, Adam and Gross, Sam and Massa, Francisco and Lerer, Adam and Bradbury, James and Chanan, Gregory and Killeen, Trevor and Lin, Zeming and Gimelshein, Natalia and Antiga, Luca and Desmaison, Alban and Kopf, Andreas and Yang, Edward and DeVito, Zachary and Raison, Martin and Tejani, Alykhan and Chilamkurthy, Sasank and Steiner, Benoit and Fang, Lu and Bai, Junjie and Chintala, Soumith},
+    year = {2019},
+    pages = {8024--8035},
+}
+
+% ============================================================
+% SciPy
+% ============================================================
+
 @article{virtanen_scipy_2020,
     title = {{SciPy} 1.0: fundamental algorithms for scientific computing in {Python}},
     volume = {17},
-    issn = {1548-7105},
     doi = {10.1038/s41592-019-0686-2},
     number = {3},
     journal = {Nature Methods},
-    author = {Virtanen, Pauli and Gommers, Ralf and Oliphant, Travis E. and Haberland, Matt and Reddy, Tyler and Cournapeau, David and Burovski, Evgeni and Peterson, Pearu and Weckesser, Warren and Bright, Jonathan and van der Walt, St{\'e}fan J. and Brett, Matthew and Wilson, Joshua and Millman, K. Jarrod and Mayorov, Nikolay and Nelson, Andrew R. J. and Jones, Eric and Kern, Robert and Larson, Eric and Carey, C J and Polat, {\.I}lhan and Feng, Yu and Moore, Eric W. and VanderPlas, Jake and Laxalde, Denis and Perktold, Josef and Cimrman, Robert and Henriksen, Ian and Quintero, E. A. and Harris, Charles R. and Archibald, Anne M. and Ribeiro, Ant{\^o}nio H. and Pedregosa, Fabian and van Mulbregt, Paul and {SciPy 1.0 Contributors}},
+    author = {Virtanen, Pauli and Gommers, Ralf and Oliphant, Travis E. and Haberland, Matt and Reddy, Tyler and Cournapeau, David and Burovski, Evgeni and Peterson, Pearu and Weckesser, Warren and Bright, Jonathan and van der Walt, Stefan J. and Brett, Matthew and Wilson, Joshua and Millman, K. Jarrod and Mayorov, Nikolay and Nelson, Andrew R. J. and Jones, Eric and Kern, Robert and Larson, Eric and Carey, C. J. and Polat, Ilhan and Feng, Yu and Moore, Eric W. and VanderPlas, Jake and Laxalde, Denis and Perktold, Josef and Cimrman, Robert and Henriksen, Ian and Quintero, E. A. and Harris, Charles R. and Archibald, Anne M. and Ribeiro, Antonio H. and Pedregosa, Fabian and van Mulbregt, Paul},
     year = {2020},
     pages = {261--272},
+}
+
+% ============================================================
+% PAC review / cross-frequency coupling review
+% ============================================================
+
+@article{canolty_task_2010,
+    title = {The functional role of cross-frequency coupling},
+    volume = {14},
+    doi = {10.1016/j.tics.2010.09.001},
+    number = {11},
+    journal = {Trends in Cognitive Sciences},
+    author = {Canolty, Ryan T. and Knight, Robert T.},
+    year = {2010},
+    pages = {506--515},
+}
+
+% ============================================================
+% Signal processing
+% ============================================================
+
+@book{oppenheim_discrete_1999,
+    title = {Discrete-Time Signal Processing},
+    edition = {2nd},
+    publisher = {Prentice Hall},
+    author = {Oppenheim, Alan V. and Schafer, Ronald W.},
+    year = {1999},
 }
