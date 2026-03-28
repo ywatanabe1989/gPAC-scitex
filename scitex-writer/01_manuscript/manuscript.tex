@@ -1,0 +1,898 @@
+% ==============================================================================
+% SciTeX Writer 2.6.7 (https://scitex.ai)
+% LaTeX compilation engine: auto
+% Compiled: 2026-02-18 21:01:57
+% Source: 01_manuscript/base.tex
+% ==============================================================================
+
+%% -*- coding: utf-8 -*-
+%% File: 01_manuscript/base.tex
+\UseRawInputEncoding
+
+%% ----------------------------------------
+%% SETTINGS
+%% ----------------------------------------
+
+% ======================================================================
+% File: ./01_manuscript/contents/latex_styles/columns.tex
+% ======================================================================
+%% -*- coding: utf-8 -*-
+%% File: 00_shared/latex_styles/columns.tex
+
+%% --- Columns ---
+%% \documentclass[final,3p,times,twocolumn]{elsarticle} %% Use it for submission
+%% Use the options 1p,twocolumn; 3p; 3p,twocolumn; 5p; or 5p,twocolumn
+%% for a journal layout:
+%% \documentclass[final,1p,times]{elsarticle}
+%% \documentclass[final,1p,times,twocolumn]{elsarticle}
+%% \documentclass[final,3p,times]{elsarticle}
+%% \documentclass[final,3p,times,twocolumn]{elsarticle}
+%% \documentclass[final,5p,times]{elsarticle}
+%% \documentclass[final,5p,times,twocolumn]{elsarticle}
+\documentclass[preprint,review,12pt]{elsarticle}
+
+%%%% EOF
+
+
+% ======================================================================
+% File: ./01_manuscript/contents/latex_styles/packages.tex
+% ======================================================================
+%% -*- coding: utf-8 -*-
+%% File: 00_shared/latex_styles/packages.tex
+%% -*- coding: utf-8 -*-
+%% Timestamp: "2025-09-27 16:01:16 (ywatanabe)"
+
+%% Language and encoding
+\usepackage[english]{babel}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+
+%% Colors (load early to avoid option clashes with tikz, pgfplots, tcolorbox)
+% Include all common color options: table (for colortbl), svgnames (for tcolorbox)
+\usepackage[table,svgnames]{xcolor}
+
+%% Mathematics
+\usepackage{amsmath, amssymb, amsthm}
+\usepackage{siunitx}
+\sisetup{round-mode=figures,round-precision=3}
+
+%% Graphics and figures
+\usepackage{graphicx}
+\usepackage{tikz}
+\usepackage{pgfplots, pgfplotstable}
+\usetikzlibrary{positioning,shapes,arrows,fit,calc,graphs,graphs.standard}
+
+%% Tables
+\usepackage{booktabs, colortbl, longtable, supertabular, tabularx, xltabular}
+\usepackage{csvsimple, makecell}
+
+%% Table formatting
+\renewcommand\theadfont{\bfseries}
+\renewcommand\theadalign{c}
+\newcolumntype{C}[1]{>{\centering\arraybackslash}m{#1}}
+\renewcommand{\arraystretch}{1.5}
+\definecolor{lightgray}{gray}{0.95}
+
+%% Layout and geometry
+\usepackage[pass]{geometry}
+\usepackage{pdflscape, indentfirst, calc}
+\usepackage{titlesec}  % For custom section formatting
+
+%% Captions and references
+\usepackage[margin=10pt,font=small,labelfont=bf,labelsep=endash]{caption}
+\usepackage[numbers]{natbib}  % numbers: numeric citations [1], [2]
+\setcitestyle{sort=false}     % Preserve citation order as written
+\usepackage{hyperref}
+
+%% Document features
+\usepackage{accsupp, lineno, bashful, lipsum}
+
+%% Visual enhancements
+\usepackage[most]{tcolorbox}
+
+%% External references
+\usepackage{xr-hyper}
+
+%% EOF
+
+%%%% EOF
+
+
+% ======================================================================
+% File: ./01_manuscript/contents/latex_styles/linker.tex
+% ======================================================================
+%% -*- coding: utf-8 -*-
+%% File: 00_shared/latex_styles/linker.tex
+
+%% --- Linker for supplemtal material ---
+\usepackage{xr}
+\makeatletter
+\newcommand*{\addFileDependency}[1]{% argument=file name and extension
+  \typeout{(#1)}
+  \@addtofilelist{#1}
+  \IfFileExists{#1}{}{\typeout{No file #1.}}
+}
+\makeatother
+
+\newcommand*{\link}[2][]{%
+    \externaldocument[#1]{#2}%
+    \addFileDependency{#2.tex}%
+    \addFileDependency{#2.aux}%
+}
+
+%%%% EOF
+
+
+% ======================================================================
+% File: ./01_manuscript/contents/latex_styles/formatting.tex
+% ======================================================================
+%% -*- coding: utf-8 -*-
+%% File: 00_shared/latex_styles/formatting.tex
+
+%% --- Journal name header (show journal name as-is, without "Preprint submitted to" prefix) ---
+\makeatletter
+\def\ps@pprintTitle{%
+  \def\@oddhead{\reset@font\footnotesize\itshape\@journal\hfill}%
+  \let\@evenhead\@oddhead
+  \def\@oddfoot{\reset@font\hfil\thepage\hfil}%
+  \let\@evenfoot\@oddfoot}
+\makeatother
+
+%% --- Image width ---
+\newlength{\imagewidth}
+\newlength{\imagescale}
+
+%% --- Line numbers ---
+\linespread{1.2}
+\linenumbers
+
+%% --- Colors ---
+\definecolor{GreenBG}{rgb}{0,1,0}
+\definecolor{RedBG}{rgb}{1,0,0}
+
+%% --- Highlight boxes ---
+\newtcbox{\greenhighlight}[1][]{on line,colframe=GreenBG,colback=GreenBG!50!white,boxrule=0pt,arc=0pt,boxsep=0pt,left=1pt,right=1pt,top=2pt,bottom=2pt,tcbox raise base}
+\newtcbox{\redhighlight}[1][]{on line,colframe=RedBG,colback=RedBG!50!white,boxrule=0pt,arc=0pt,boxsep=0pt,left=1pt,right=1pt,top=2pt,bottom=2pt,tcbox raise base}
+
+\newcommand{\REDSTARTS}{\color{red}}
+\newcommand{\REDENDS}{\color{black}}
+\newcommand{\GREENSTARTS}{\color{green}}
+\newcommand{\GREENENDS}{\color{black}}
+
+%% --- Word count ---
+\newread\wordcount
+\newcommand\readwordcount[1]{%
+\openin\wordcount=#1
+\read\wordcount to \thewordcount
+\closein\wordcount
+\begingroup\sisetup{round-mode=none}\num{\thewordcount}\endgroup%
+}
+
+%% --- Text highlighting ---
+\usepackage{soul}
+\sethlcolor{yellow}
+
+%% --- Reference handling ---
+\usepackage{refcount}
+
+\let\oldref\ref
+\newcommand{\hlref}[1]{%
+  \ifnum\getrefnumber{#1}=0
+    \colorbox{yellow}{\ref*{#1}}%  % Use colorbox for references (no line break needed)
+  \else
+    \ref{#1}%
+  \fi
+}
+
+% To add an 'S' prefixes to a reference
+\newcommand*\sref[1]{S\hlref{#1}}
+\newcommand*\sfref[1]{Supplementary Figure S\hlref{#1}}
+\newcommand*\stref[1]{Supplementary Table S\hlref{#1}}
+\newcommand*\smref[1]{Supplementary Materials S\hlref{#1}}
+
+%%%% EOF
+
+\link[supple-]{./02_supplementary/supplementary}
+
+%% ----------------------------------------
+%% JOURNAL NAME
+%% ----------------------------------------
+
+% ======================================================================
+% File: ./01_manuscript/contents/journal_name.tex
+% ======================================================================
+\journal{Journal Name Here}
+
+
+
+%% ----------------------------------------
+%% START of DOCUMENT
+%% ----------------------------------------
+
+% Dark mode styling (inlined at compile time)
+%% -*- coding: utf-8 -*-
+%% Timestamp: "2025-11-10 01:30:00 (ywatanabe)"
+%% File: ./00_shared/latex_styles/dark_mode.tex
+%% Description: Dark mode styling for scientific manuscripts
+
+%% Dark mode configuration
+%% Background: Monaco/VS Code editor (#1E1E1E)
+%% Text: VS Code default foreground (#D4D4D4)
+%% Figures: unchanged (preserve original colors)
+
+% Set page and text colors - matches Monaco/VS Code dark theme
+\definecolor{MonacoBg}{HTML}{1E1E1E}
+\definecolor{MonacoFg}{HTML}{D4D4D4}
+\pagecolor{MonacoBg}
+\color{MonacoFg}
+
+% Link text colors for dark mode (colorlinks=true)
+\definecolor{DarkGreen}{HTML}{90C695}     % Internal links (Figure/Table): muted sage
+\definecolor{DarkCyan}{HTML}{87CEEB}      % Citations/references: sky blue
+\definecolor{DarkOrange}{HTML}{DEB887}    % External URLs: burlywood
+
+% Hyperlink colors set via hypersetup (injected after \begin{document})
+
+% Override hlref colorbox for dark mode (no yellow box on dark background)
+\renewcommand{\hlref}[1]{%
+  \ifnum\getrefnumber{#1}=0
+    {\color{DarkGreen}\ref*{#1}}%
+  \else
+    \ref{#1}%
+  \fi
+}
+
+% Section titles: same color as body text, just bold
+\titleformat{\section}
+  {\normalfont\Large\bfseries\color{MonacoFg}}{\thesection}{1em}{}
+\titleformat{\subsection}
+  {\normalfont\large\bfseries\color{MonacoFg}}{\thesubsection}{1em}{}
+\titleformat{\subsubsection}
+  {\normalfont\normalsize\bfseries\color{MonacoFg}}{\thesubsubsection}{1em}{}
+
+% Caption labels: same as body text, left-aligned
+\captionsetup{
+  labelfont={bf,color=MonacoFg},
+  textfont={color=MonacoFg},
+  justification=raggedright,
+  singlelinecheck=false
+}
+
+% Adjust table colors for dark mode
+\definecolor{lightgray}{gray}{0.2}  % Darker "light" gray for table rows
+
+% Override color commands to work well in dark mode
+\renewcommand{\REDENDS}{\color{white}}    % Reset to white instead of black
+\renewcommand{\GREENENDS}{\color{white}}  % Reset to white instead of black
+
+% Adjust highlight boxes for dark mode
+\newtcbox{\darkgreenhighlight}[1][]{on line,colframe=green!70!white,colback=green!20!black,boxrule=0pt,arc=0pt,boxsep=0pt,left=1pt,right=1pt,top=2pt,bottom=2pt,tcbox raise base}
+\newtcbox{\darkredhighlight}[1][]{on line,colframe=red!70!white,colback=red!20!black,boxrule=0pt,arc=0pt,boxsep=0pt,left=1pt,right=1pt,top=2pt,bottom=2pt,tcbox raise base}
+
+% Adjust soul highlighting for dark mode
+\sethlcolor{yellow!30!black}  % Darker yellow highlight
+
+%%%% EOF
+
+\begin{document}
+
+%% ----------------------------------------
+%% Frontmatter
+%% ----------------------------------------
+\begin{frontmatter}
+
+% ======================================================================
+% File: ./01_manuscript/contents/highlights.tex
+% ======================================================================
+%% -*- coding: utf-8 -*-
+%% \begin{highlights}
+%% \pdfbookmark[1]{Highlights}{highlights}
+
+%% \item Highlight \#1
+
+%% \item Highlight \#2
+
+%% \item Highlight \#3
+
+%% \end{highlights}
+
+%%%% EOF
+
+
+
+% ======================================================================
+% File: ./01_manuscript/contents/title.tex
+% ======================================================================
+%% -*- coding: utf-8 -*-
+\title{
+Your Manuscript Title Here
+}
+
+%%%% EOF
+
+
+
+% ======================================================================
+% File: ./01_manuscript/contents/authors.tex
+% ======================================================================
+%% -*- coding: utf-8 -*-
+\author[1]{First Author\corref{cor1}}
+\author[2]{Second Author}
+\author[3]{Third Author}
+
+\address[1]{First Institution, Department, City, Country}
+\address[2]{Second Institution, Department, City, Country}
+\address[3]{Third Institution, Department, City, Country}
+
+\cortext[cor1]{Corresponding author. Email: your.email@institution.edu}
+
+%%%% EOF
+
+
+
+% ======================================================================
+% File: ./01_manuscript/contents/graphical_abstract.tex
+% ======================================================================
+%%Graphical abstract
+%\pdfbookmark[1]{Graphical Abstract}{graphicalabstract}
+%\begin{graphicalabstract}
+%\includegraphics{grabs}
+%\end{graphicalabstract}
+
+
+
+% ======================================================================
+% File: ./01_manuscript/contents/abstract.tex
+% ======================================================================
+%% -*- coding: utf-8 -*-
+\begin{abstract}
+  \pdfbookmark[1]{Abstract}{abstract}
+
+Replace this text with your manuscript abstract. Typically 150--250 words summarizing objectives, methods, key findings, and conclusions.
+
+\vspace{1em}
+\end{abstract}
+
+%%%% EOF
+
+
+
+% ======================================================================
+% File: ./01_manuscript/contents/keywords.tex
+% ======================================================================
+% \pdfbookmark[1]{Keywords}{keywords}
+\begin{keyword}
+keyword one \sep keyword two \sep keyword three \sep keyword four \sep keyword five
+\end{keyword}
+
+
+\end{frontmatter}
+
+%% ----------------------------------------
+%% Word Counter
+%% ----------------------------------------
+
+% ======================================================================
+% File: ./01_manuscript/contents/wordcount.tex
+% ======================================================================
+%% -*- coding: utf-8 -*-
+%% File: 01_manuscript/contents/wordcount.tex
+\noindent\small
+\readwordcount{./01_manuscript/contents/wordcounts/figure_count.txt} figures,
+\readwordcount{./01_manuscript/contents/wordcounts/table_count.txt} tables,
+\readwordcount{./01_manuscript/contents/wordcounts/abstract_count.txt} words for abstract, and
+\readwordcount{./01_manuscript/contents/wordcounts/imrd_count.txt} words for main text
+(\readwordcount{./01_manuscript/contents/wordcounts/introduction_count.txt} for introduction,
+\readwordcount{./01_manuscript/contents/wordcounts/methods_count.txt} for methods,
+\readwordcount{./01_manuscript/contents/wordcounts/results_count.txt} for results,
+\readwordcount{./01_manuscript/contents/wordcounts/discussion_count.txt} for discussion)
+\normalsize
+
+%%%% EOF
+
+
+%% ----------------------------------------
+%% INTRODUCTION
+%% ----------------------------------------
+
+% ======================================================================
+% File: ./01_manuscript/contents/introduction.tex
+% ======================================================================
+%% -*- coding: utf-8 -*-
+
+\section{Introduction}
+
+Replace this with your introduction. Establish context, review relevant work \cite{example_reference_2020}, identify gaps, and state your objectives.
+
+%%%% EOF
+
+
+
+%% ----------------------------------------
+%% METHODS
+%% ----------------------------------------
+
+% ======================================================================
+% File: ./01_manuscript/contents/methods.tex
+% ======================================================================
+%% -*- coding: utf-8 -*-
+
+\section{Methods}
+
+Replace this with your methods. Describe study design, data collection, and analysis procedures \cite{example_method_2019}. Provide enough detail for reproducibility.
+
+%%%% EOF
+
+
+
+%% ----------------------------------------
+%% RESULTS
+%% ----------------------------------------
+
+% ======================================================================
+% File: ./01_manuscript/contents/results.tex
+% ======================================================================
+%% -*- coding: utf-8 -*-
+
+\section{Results}
+
+Replace this with your results. Present findings with references to figures (Figure~\ref{fig:01_example_figure}) and tables (Table~\ref{tab:01_example_table}).
+
+%%%% EOF
+
+
+
+%% ----------------------------------------
+%% DISCUSSION
+%% ----------------------------------------
+
+% ======================================================================
+% File: ./01_manuscript/contents/discussion.tex
+% ======================================================================
+%% -*- coding: utf-8 -*-
+
+\section{Discussion}
+
+Replace this with your discussion. Interpret findings, compare with previous work, discuss limitations, and state conclusions.
+
+%%%% EOF
+
+
+
+%% ----------------------------------------
+%% REFERENCE STYLES
+%% ----------------------------------------
+\pdfbookmark[1]{References}{references}
+% Note: Path without ./ prefix allows bibtex to use BIBINPUTS search path
+\bibliography{01_manuscript/contents/bibliography}
+
+% ======================================================================
+% File: ./01_manuscript/contents/latex_styles/bibliography.tex
+% ======================================================================
+%% -*- coding: utf-8 -*-
+%% File: 00_shared/latex_styles/bibliography.tex
+
+%% ============================================================================
+%% BIBLIOGRAPHY STYLE CONFIGURATION
+%% ============================================================================
+
+%% ----------------------------------------------------------------------------
+%% OPTION 1: NUMBERED CITATIONS (Order of Appearance) - CURRENTLY ACTIVE
+%% ----------------------------------------------------------------------------
+%% Description: Citations numbered [1], [2], [3]... in the order they first
+%%              appear in the manuscript
+%% Sorting: By first citation order (NOT alphabetical)
+%% Example: \cite{Tort2010,Canolty2010} → [1, 2] (if these are first citations)
+%% Commands: \cite{key} → [1]
+%%           \cite{key1,key2} → [1, 2]
+%% Best for: Most scientific journals, clear citation tracking
+%% Compatible with: natbib package
+\bibliographystyle{unsrtnat}
+
+%% ----------------------------------------------------------------------------
+%% OPTION 2: NUMBERED CITATIONS (Alphabetical by Author)
+%% ----------------------------------------------------------------------------
+%% Description: Citations numbered [1], [2], [3]... sorted alphabetically by
+%%              first author's last name
+%% Sorting: Alphabetical by author (Canolty before Tort)
+%% Example: \cite{Tort2010,Canolty2010} → [2, 1] (C before T alphabetically)
+%% Commands: \cite{key} → [1]
+%% Best for: When you want bibliography sorted alphabetically
+%% Compatible with: elsarticle class
+% \bibliographystyle{elsarticle-num}
+
+%% Alternative alphabetical styles:
+% \bibliographystyle{plain}      % Basic alphabetical, no natbib features
+% \bibliographystyle{ieeetr}     % IEEE style, order of appearance
+% \bibliographystyle{siam}       % SIAM style, alphabetical
+
+%% ----------------------------------------------------------------------------
+%% OPTION 3: AUTHOR-YEAR CITATIONS
+%% ----------------------------------------------------------------------------
+%% Description: Citations show author name and year (Smith, 2020) or (Smith 2020)
+%% Format: (Author, Year) or Author (Year) depending on command
+%% Example: \cite{Tort2010} → (Tort et al., 2010)
+%%          \citet{Tort2010} → Tort et al. (2010) [textual]
+%%          \cite{Tort2010} → (Tort et al., 2010) [parenthetical]
+%% Commands:
+%%   - \citet{key}  → Author (Year)  [for text: "As shown by Author (2020)..."]
+%%   - \cite{key}  → (Author, Year) [for parentheses: "...as shown (Author, 2020)"]
+%%   - \cite{key}   → Same as \cite{key}
+%% Best for: Review papers, humanities, some social sciences
+%% Requires: natbib package (already loaded)
+% \bibliographystyle{plainnat}   % Author-year, alphabetical
+% \bibliographystyle{abbrvnat}   % Author-year, abbreviated names
+% \bibliographystyle{apalike}    % APA-like author-year style
+
+%% ----------------------------------------------------------------------------
+%% OPTION 4: JOURNAL-SPECIFIC STYLES
+%% ----------------------------------------------------------------------------
+%% Elsevier journals:
+% \bibliographystyle{elsarticle-num}        % Numbered, alphabetical
+% \bibliographystyle{elsarticle-num-names}  % Numbered, alphabetical, full names
+% \bibliographystyle{elsarticle-harv}       % Author-year (Harvard style)
+
+%% Nature family:
+% \bibliographystyle{naturemag}             % Nature magazine style
+
+%% IEEE:
+% \bibliographystyle{IEEEtran}              % IEEE Transactions style
+
+%% APA:
+% \bibliographystyle{apalike}               % APA-like style
+
+%% ----------------------------------------------------------------------------
+%% OPTION 5: ADDITIONAL CITATION STYLES
+%% ----------------------------------------------------------------------------
+%% Note: Many of these styles require biblatex instead of natbib.
+%% To use biblatex, you need to modify the preamble and use biber instead of bibtex.
+%% Basic conversion: Replace natbib package with biblatex, and use \printbibliography
+%% instead of \bibliographystyle + \bibliography commands.
+
+%% ----------------------------------------
+%% CHEMISTRY
+%% ----------------------------------------
+%% American Chemical Society (ACS):
+%% Installation: Download achemso.bst or use biblatex with style=chem-acs
+%% Format: Numbered, order of appearance, (1) Author, A. B. Title. Journal Year, Volume, Pages.
+%% BibTeX method:
+% \bibliographystyle{achemso}              % ACS style (requires achemso package)
+%% Biblatex method (recommended):
+% \usepackage[style=chem-acs]{biblatex}
+
+%% ----------------------------------------
+%% MEDICAL & HEALTH SCIENCES
+%% ----------------------------------------
+%% American Medical Association (AMA) 11th edition:
+%% Format: Numbered, order of appearance, superscript numbers
+%% Installation: Requires biblatex with biblatex-ama style
+%% Method:
+% \usepackage[style=ama]{biblatex}         % AMA 11th ed (requires biblatex-ama package)
+
+%% Vancouver style (ICMJE):
+%% Format: Numbered [1], order of appearance, commonly used in medical journals
+%% Note: unsrtnat (currently active) is very similar to Vancouver
+% \bibliographystyle{vancouver}            % Vancouver/ICMJE style (if .bst available)
+% \bibliographystyle{unsrtnat}             % Similar to Vancouver (currently active)
+
+%% ----------------------------------------
+%% SOCIAL SCIENCES
+%% ----------------------------------------
+%% American Psychological Association (APA) 7th edition:
+%% Format: Author-year, (Author, Year), alphabetical by author
+%% BibTeX method (APA-like, not full APA 7th):
+% \bibliographystyle{apalike}              % APA-like style (simplified)
+% \bibliographystyle{apacite}              % APA 6th/7th (requires apacite package)
+%% Biblatex method (recommended for full APA 7th compliance):
+% \usepackage[style=apa]{biblatex}         % Full APA 7th edition (requires biblatex-apa)
+
+%% American Sociological Association (ASA) 6th/7th edition:
+%% Format: Author-year, (Author Year), alphabetical, similar to Chicago author-date
+%% Method:
+% \bibliographystyle{asaetr}               % ASA-like style (if .bst available)
+%% Biblatex method:
+% \usepackage[style=authoryear]{biblatex} % Generic author-year (customizable to ASA)
+
+%% American Political Science Association (APSA):
+%% Format: Author-year, similar to Chicago author-date
+%% Method:
+% \usepackage[style=authoryear-comp]{biblatex}  % Compressed author-year for APSA
+
+%% ----------------------------------------
+%% HUMANITIES
+%% ----------------------------------------
+%% Chicago Manual of Style 18th edition (author-date):
+%% Format: Author-year, (Author Year), commonly used in social sciences and humanities
+% \bibliographystyle{chicago}              % Chicago author-date (if .bst available)
+%% Biblatex method (recommended):
+% \usepackage[style=chicago-authordate]{biblatex}  % Chicago 18th ed author-date
+
+%% Chicago Manual of Style 18th edition (notes and bibliography):
+%% Format: Footnote/endnote citations with full bibliography
+%% Method:
+% \usepackage[style=chicago-notes]{biblatex}  % Chicago 18th ed notes style
+
+%% Chicago Manual of Style 18th edition (shortened notes and bibliography):
+%% Format: Shortened footnote citations after first full citation
+%% Method:
+% \usepackage[style=chicago-notes]{biblatex}  % Use with ibidtracker option
+
+%% Modern Language Association (MLA) 9th edition:
+%% Format: Author-page, (Author Page), works cited list
+%% Method:
+% \usepackage[style=mla]{biblatex}         % MLA 9th edition (requires biblatex-mla)
+
+%% Modern Humanities Research Association (MHRA) 4th edition:
+%% Format: Footnote citations with bibliography
+%% Method:
+% \usepackage[style=mhra]{biblatex}        % MHRA 4th edition (requires biblatex-mhra)
+
+%% ----------------------------------------
+%% HARVARD STYLES
+%% ----------------------------------------
+%% Cite Them Right 12th edition - Harvard:
+%% Format: Author-year, (Author, Year), widely used in UK universities
+% \bibliographystyle{agsm}                 % Harvard style (Australian)
+% \bibliographystyle{dcu}                  % Harvard style (Dublin City University)
+%% Biblatex method:
+% \usepackage[style=authoryear]{biblatex} % Generic Harvard-style (author-year)
+
+%% Elsevier - Harvard (with titles):
+%% Format: Author-year with article titles included
+% \bibliographystyle{elsarticle-harv}      % Elsevier Harvard style (already listed above)
+
+%% ----------------------------------------
+%% ENGINEERING & COMPUTER SCIENCE
+%% ----------------------------------------
+%% IEEE (Institute of Electrical and Electronics Engineers):
+%% Format: Numbered [1], order of appearance, widely used in engineering
+% \bibliographystyle{IEEEtran}             % IEEE Transactions style (already listed above)
+
+%% ----------------------------------------
+%% NATURAL SCIENCES
+%% ----------------------------------------
+%% Nature:
+%% Format: Numbered, superscript, order of appearance
+% \bibliographystyle{naturemag}            % Nature magazine style (already listed above)
+% \bibliographystyle{naturemag-doi}        % Nature with DOIs
+
+%% ----------------------------------------------------------------------------
+%% BIBLATEX SETUP INSTRUCTIONS
+%% ----------------------------------------------------------------------------
+%% To switch from natbib to biblatex:
+%%
+%% 1. In packages.tex, replace:
+%%    \usepackage[numbers]{natbib}
+%%    with:
+%%    \usepackage[style=STYLENAME,backend=biber]{biblatex}
+%%    \addbibresource{path/to/bibliography.bib}
+%%
+%% 2. In this file (bibliography.tex), replace:
+%%    \bibliographystyle{...}
+%%    with:
+%%    % No \bibliographystyle needed with biblatex
+%%
+%% 3. In your main .tex file, replace:
+%%    \bibliography{path/to/bibliography}
+%%    with:
+%%    \printbibliography
+%%
+%% 4. Change compilation command:
+%%    pdflatex → biber → pdflatex → pdflatex
+%%    (instead of pdflatex → bibtex → pdflatex → pdflatex)
+%%
+%% Example biblatex styles:
+%%   style=numeric-comp     → Compressed numeric [1-3,5]
+%%   style=authoryear       → (Author, Year)
+%%   style=authoryear-comp  → (Author1, 2020; Author2, 2021)
+%%   style=apa              → APA 7th edition
+%%   style=chicago-authordate → Chicago author-date
+%%   style=ieee             → IEEE style
+%%   style=nature           → Nature style
+%%   style=mla              → MLA 9th edition
+
+%% ----------------------------------------------------------------------------
+%% CITATION COMMAND REFERENCE (with natbib)
+%% ----------------------------------------------------------------------------
+%% Basic commands:
+%%   \cite{key}              → [1] or (Author, Year) depending on style
+%%   \cite{key1,key2}        → [1, 2] or (Author1, Year1; Author2, Year2)
+%%
+%% Advanced natbib commands (only work with natbib-compatible styles):
+%%   \citet{key}             → Author (Year)  [textual citation]
+%%   \cite{key}             → (Author, Year) [parenthetical citation]
+%%   \citet*{key}            → Full author list (Year)
+%%   \cite*{key}            → (Full author list, Year)
+%%   \citealt{key}           → Author Year [no parentheses]
+%%   \citealp{key}           → Author, Year [no parentheses]
+%%   \citeauthor{key}        → Author [name only]
+%%   \citeyear{key}          → Year [year only]
+%%   \citeyearpar{key}       → (Year) [year in parentheses]
+%%
+%% Pre/post notes:
+%%   \cite[see][p.~10]{key} → (see Author, Year, p. 10)
+%%   \cite[p.~10]{key}      → (Author, Year, p. 10)
+%%
+%% Multiple citations:
+%%   \cite{key1,key2,key3}  → (Author1, Year1; Author2, Year2; Author3, Year3)
+%%
+%% Suppressing parts:
+%%   \cite[e.g.,][]{key}    → (e.g., Author, Year)
+%%   \cite[][see p.~10]{key}→ (Author, Year, see p. 10)
+%%
+%% ----------------------------------------------------------------------------
+%% TROUBLESHOOTING
+%% ----------------------------------------------------------------------------
+%% Problem: Citations appear as [?] or undefined
+%% Solution: Run compilation 3-4 times to resolve all references
+%%
+%% Problem: Citation numbers out of order [3, 1] instead of [1, 3]
+%% Solution: Use unsrtnat (order of appearance) instead of elsarticle-num
+%%
+%% Problem: "Undefined control sequence \citet"
+%% Solution: \citet only works with natbib-compatible styles (unsrtnat, plainnat)
+%%           Use \cite{} with non-natbib styles
+%%
+%% Problem: Bibliography not appearing
+%% Solution: Ensure \bibliography{path/to/bibfile} command exists in main file
+%%           Run: pdflatex → bibtex → pdflatex → pdflatex
+
+%%%% EOF
+
+
+%% ----------------------------------------
+%% DATA AVAILABILITY
+%% ----------------------------------------
+
+% ======================================================================
+% File: ./01_manuscript/contents/data_availability.tex
+% ======================================================================
+%% -*- coding: utf-8 -*-
+\pdfbookmark[1]{Data Availability Statement}{data_availability}
+
+\section*{Data Availability Statement}
+
+The data and code that support the findings of this study are available from the corresponding author upon reasonable request.
+
+\label{data and code availability}
+
+%%%% EOF
+
+
+
+%% ----------------------------------------
+%% ADDITIONAL INFORMATION
+%% ----------------------------------------
+
+% ======================================================================
+% File: ./01_manuscript/contents/additional_info.tex
+% ======================================================================
+%% -*- coding: utf-8 -*-
+
+\pdfbookmark[1]{Additional Information}{additional_information}
+
+\pdfbookmark[2]{Ethics Declarations}{ethics_declarations}
+\section*{Ethics Declarations}
+Replace with your ethics statement.
+\label{ethics declarations}
+
+\pdfbookmark[2]{Contributors}{author_contributions}
+\section*{Author Contributions}
+Replace with author contributions.
+\label{author contributions}
+
+\pdfbookmark[2]{Acknowledgments}{acknowledgments}
+\section*{Acknowledgments}
+Replace with acknowledgments.
+\label{acknowledgments}
+
+\pdfbookmark[2]{Declaration of Interests}{declaration_of_interest}
+\section*{Declaration of Interests}
+The authors declare that they have no competing interests.
+\label{declaration of interests}
+
+\pdfbookmark[2]{Declaration of Generative AI in Scientific Writing}{declaration_of_generative_ai}
+\section*{Declaration of Generative AI in Scientific Writing}
+Disclose any use of generative AI tools here.
+\label{declaration of generative ai in scientific writing}
+
+%%%% EOF
+
+
+
+%% ----------------------------------------
+%% TABLES
+%% ----------------------------------------
+\clearpage
+\section*{Tables}
+\label{tables}
+\pdfbookmark[1]{Tables}{tables}
+\vspace{1cm}
+
+% ======================================================================
+% File: ./01_manuscript/contents/tables/compiled/FINAL.tex
+% ======================================================================
+% Auto-generated file containing all table inputs
+% Generated by gather_table_tex_files()
+
+% Table from: 01_example_table.tex
+
+% ======================================================================
+% File: ./01_manuscript/contents/tables/compiled/01_example_table.tex
+% ======================================================================
+\pdfbookmark[2]{Table 01 --- Replace with your table title}{table_01_example_table}
+\begin{table}[htbp]
+\centering
+\footnotesize
+\begin{tabular}{|l|l|l|}
+\hline
+Category&Value&Description\\
+\hline
+Example A&1.00&Replace with your data\\
+\hline
+Example B&2.00&Replace with your data\\
+\hline
+Example C&3.00&Replace with your data\\
+\hline
+\end{tabular}
+%% Edit this file: 01_manuscript/contents/tables/caption_and_media/01_example_table.tex
+\caption{\textbf{Replace with your table title.}\\
+\smallskip
+Replace with your table legend text. Edit this caption at \texttt{01\_manuscript/contents/tables/caption\_and\_media/01\_example\_table.tex}.
+}
+\label{tab:01_example_table}
+\end{table}
+
+
+
+
+
+
+%% ----------------------------------------
+%% FIGURES
+%% ----------------------------------------
+\clearpage
+\section*{Figures}
+\label{figures}
+\pdfbookmark[1]{Figures}{figures}
+\vspace{1cm}
+
+% ======================================================================
+% File: ./01_manuscript/contents/figures/compiled/FINAL.tex
+% ======================================================================
+% Generated by compile_figure_tex_files()
+% This file includes all figure files in order
+
+% Figure 01
+\begin{figure*}[htbp]
+    \pdfbookmark[2]{Figure 01 --- Replace with your figure title}{.01}
+    \centering
+    \includegraphics[width=0.9\textwidth]{./01_manuscript/contents/figures/caption_and_media/jpg_for_compilation/01_example_figure.jpg}
+    \caption{\textbf{Replace with your figure title.}\\
+\smallskip
+Replace with your figure legend text. Edit this caption at \texttt{01\_manuscript/contents/figures/caption\_and\_media/01\_example\_figure.tex}.
+}
+\label{fig:01_example_figure}
+\end{figure*}
+
+% Figure 02
+\begin{figure*}[htbp]
+    \pdfbookmark[2]{Figure 02 --- Replace with your figure title}{.02}
+    \centering
+    \includegraphics[width=0.9\textwidth]{./01_manuscript/contents/figures/caption_and_media/jpg_for_compilation/02_another_example.jpg}
+    \caption{\textbf{Replace with your figure title.}\\
+\smallskip
+Replace with your figure legend text. Edit this caption at \texttt{01\_manuscript/contents/figures/caption\_and\_media/02\_another\_example.tex}.
+}
+\label{fig:02_another_example}
+\end{figure*}
+
+
+
+
+%% ----------------------------------------
+%% END of DOCUMENT
+%% ----------------------------------------
+\end{document}
+
+%%%% EOF

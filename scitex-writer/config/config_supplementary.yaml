@@ -1,0 +1,68 @@
+# Timestamp: "2025-09-27 18:59:28 (ywatanabe)"
+# File: ./paper/config/config_supplementary.yaml
+
+verbosity:
+  pdflatex: true
+  bibtex: true
+
+citation:
+  # Citation style configuration
+  # For natbib-based styles (simple, works out of the box):
+  #   - unsrtnat         : Numbered [1], order of appearance (Vancouver-like)
+  #   - plainnat         : Numbered [1], alphabetical by author
+  #   - abbrvnat         : Numbered, abbreviated names
+  #   - apalike          : Author-year, APA-like style
+  #   - IEEEtran         : IEEE Transactions style
+  #   - naturemag        : Nature magazine style
+  #   - elsarticle-num   : Elsevier numbered, alphabetical
+  #   - elsarticle-harv  : Elsevier Harvard (author-year)
+  #
+  # For biblatex-based styles (requires switching from natbib to biblatex):
+  #   See 00_shared/latex_styles/bibliography.tex for instructions on:
+  #   - apa, chicago-authordate, mla, mhra, ieee, nature, etc.
+  style: "unsrtnat"  # Default: numbered citations, order of appearance
+
+paths:
+  doc_root_dir: "./02_supplementary"
+  doc_log_dir: "./02_supplementary/logs"
+  global_log_file: "./02_supplementary/logs/global.log"
+  base_tex: "./02_supplementary/base.tex"
+  compiled_tex: "./02_supplementary/supplementary.tex"
+  compiled_pdf: "./02_supplementary/supplementary.pdf"
+  diff_tex: "./02_supplementary/supplementary_diff.tex"
+  diff_pdf: "./02_supplementary/supplementary_diff.pdf"
+  archive_dir: "./02_supplementary/archive"
+  texlive_apptainer_sif: "./.cache/containers/texlive_container.sif"
+  mermaid_apptainer_sif: "./.cache/containers/mermaid_container.sif"
+  imagemagick_apptainer_sif: "./.cache/containers/imagemagick_container.sif"
+  
+figures:
+  dir: "./02_supplementary/contents/figures"
+  caption_media_dir: "./02_supplementary/contents/figures/caption_and_media"
+  jpg_dir: "./02_supplementary/contents/figures/caption_and_media/jpg_for_compilation"
+  compiled_dir: "./02_supplementary/contents/figures/compiled"
+  compiled_file: "./02_supplementary/contents/figures/compiled/FINAL.tex"
+  templates_dir: "./00_shared/templates/figures"
+  template_pptx: "./00_shared/templates/figures/.00_TEMPLATE.pptx"  
+  template_tif: "./00_shared/templates/figures/.00_TEMPLATE.tif"  
+  template_jpg: "./00_shared/templates/figures/.00_TEMPLATE.jpg"
+  template_jnb: "./00_shared/templates/figures/.00_TEMPLATE.JNB"  
+
+tables:
+  dir: "./02_supplementary/contents/tables"
+  caption_media_dir: "./02_supplementary/contents/tables/caption_and_media"
+  compiled_dir: "./02_supplementary/contents/tables/compiled"
+  compiled_file: "./02_supplementary/contents/tables/compiled/FINAL.tex"
+
+misc:
+  wordcount_dir: "./02_supplementary/contents/wordcounts"
+  tree_txt: "./02_supplementary/docs/tree.txt"
+
+dark_mode:
+  background: "1E1E1E"        # Monaco/VS Code bg
+  foreground: "D4D4D4"        # VS Code default fg
+  link_internal: "90C695"     # Figure/Table refs (DarkGreen)
+  link_citation: "87CEEB"     # Citations (DarkCyan)
+  link_url: "DEB887"          # External URLs (DarkOrange)
+
+# EOF
