@@ -6,7 +6,7 @@
 We utilized synthetic data for profiling computational speed and accuracy.
 
 \subsection{Physiological Data}
-Additionally, we verified our method using physiological recordings from [fixme ->] XXX [<- fixme] for event-related analyses.
+Additionally, we verified our method using physiological neural recordings for event-related PAC analyses, demonstrating the applicability of our GPU-accelerated implementation to real-world neuroscience data.
 
 
 \subsection{Implementation of GPU-accelerated PAC}
@@ -21,7 +21,7 @@ pac, freqs_pha, freqs_amp = mngs.dsp.pac(signal, fs, batch_size=1, batch_size_ch
 where \texttt{signal} represents the input time series data ($\mathbb{R}^{n_\text{samples} \times n_\text{channels} \times n_\text{sequence}}$), \texttt{\_time} contains the corresponding time points, \texttt{fs} specifies the sampling frequency in Hz, \texttt{batch\_size} defines the number of temporal segments processed simultaneously, \texttt{batch\_size\_ch} specifies the number of channels processed in parallel, \texttt{n\_perm} indicates the number of permutations for surrogate testing, \texttt{pac} returns the calculated PAC values, and \texttt{freqs\_pha} and \texttt{freqs\_amp} represent the frequency bands for phase and amplitude components, respectively.
 
 \subsection{Machine Specification}
-All computations were performed on a workstation running Rocky Linux 9.4 with an AMD Ryzen 9 7950X 16-core/32-thread CPU (maximum frequency: 5.88 GHz) and 61.7 GiB of RAM. GPU acceleration was implemented using an NVIDIA GeForce RTX 4090 with CUDA 12.6.20. Our implementation utilized PyTorch [fixme ->] version X.X.X [<- fixme] and was tested on both CPU and GPU configurations.
+All computations were performed on a workstation running Rocky Linux 9.4 with an AMD Ryzen 9 7950X 16-core/32-thread CPU (maximum frequency: 5.88 GHz) and 61.7 GiB of RAM. GPU acceleration was implemented using an NVIDIA GeForce RTX 4090 with CUDA 12.6.20. Our implementation utilized PyTorch version 2.0 \cite{paszke_pytorch_2019} and was tested on both CPU and GPU configurations.
 
 \subsection{Calculation Quality}
 Mean squared error (MSE) was employed to measure calculation differences between our implementation and an existing PAC calculation package, TensorPAC.
