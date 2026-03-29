@@ -114,6 +114,11 @@ data/*
 !docs/scitex-*.png
 !docs/demo-*.png
 
+# Figure image symlinks for LaTeX compilation
+!**/jpg_for_compilation/*.jpg
+!**/jpg_for_compilation/*.jpeg
+!**/jpg_for_compilation/*.png
+
 # Main manuscript output PDFs (small, useful for collaborators)
 !01_manuscript/manuscript.pdf
 !01_manuscript/manuscript_diff.pdf
