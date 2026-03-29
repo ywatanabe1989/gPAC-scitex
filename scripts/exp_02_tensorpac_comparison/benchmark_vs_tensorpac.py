@@ -1,16 +1,15 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # Timestamp: "2025-05-14 12:25:42 (ywatanabe)"
-# File: /ssh:sp:/home/ywatanabe/proj/gPAC/scripts/exp_02_tensorpac_comparison/benchmark_vs_tensorpac.py
+# File: ./scripts/exp_02_tensorpac_comparison/benchmark_vs_tensorpac.py
 # ----------------------------------------
 import os
-__FILE__ = (
-    "./scripts/exp_02_tensorpac_comparison/benchmark_vs_tensorpac.py"
-)
+
+import scitex as stx
+
+__FILE__ = os.path.abspath(__file__)
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
-
-import mngs
 
 """
 Functionalities:
@@ -24,7 +23,7 @@ Dependencies:
     - PyTorch
     - Tensorpac
     - NumPy
-    - mngs
+    - scitex
 
 IO:
   - input-files:
@@ -65,7 +64,7 @@ warnings.filterwarnings(
 warnings.filterwarnings("ignore", category=FutureWarning)
 
 """Parameters"""
-# Will be loaded via mngs.io.load_configs() in run_main()
+# Will be loaded via stx.io.load_configs() in main()
 
 """Functions & Classes"""
 def setup_experiment_from_params(
@@ -486,7 +485,7 @@ def get_system_resource_usage(device: str) -> Dict:
 
             pynvml.nvmlShutdown()
         except:
-            # Fallback: attempt to parse nvidia-smi output
+            # Fallback: attempt to parse nvidia-smi output (user-confirmed fallback)
             try:
                 import subprocess
 
@@ -578,9 +577,9 @@ def run_benchmarks(
         },
     }
 
-    # Use mngs.io.save() with proper relative path format
+    # Use stx.io.save() with proper relative path format
     rel_path = f"./results/benchmark/benchmark_{start_time}.json"
-    mngs.io.save(benchmark_results, rel_path, symlink_from_cwd=True)
+    stx.io.save(benchmark_results, rel_path)
 
     return benchmark_results
 
@@ -626,13 +625,17 @@ def run_parameter_sweep(
     return results
 
 
+@stx.session
 def main(args):
     """Main function for benchmarking gPAC against Tensorpac."""
+    global CONFIG
+
+    CONFIG = stx.io.load_configs()
+
     # Save initial info
-    mngs.io.save(
+    stx.io.save(
         {"timestamp": str(datetime.now())},
         "./results/benchmark/results_info.json",
-        symlink_from_cwd=True,
     )
 
     # Set random seed for reproducibility
@@ -697,10 +700,10 @@ def main(args):
             "results": sweep_results,
         }
 
-        # Save combined results using mngs.io.save with proper relative path
+        # Save combined results using stx.io.save
         timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
         rel_path = f"./results/benchmark/sweep_{param_name}_{timestamp}.json"
-        mngs.io.save(combined_results, rel_path, symlink_from_cwd=True)
+        stx.io.save(combined_results, rel_path)
 
     elif args.param_grid:
         # Grid search mode
@@ -757,11 +760,11 @@ def main(args):
             ],
         }
 
-        # Save combined results using mngs.io.save with proper relative path
+        # Save combined results using stx.io.save
         timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
         grid_name = '_'.join(param_names)
         rel_path = f"./results/benchmark/grid_{grid_name}_{timestamp}.json"
-        mngs.io.save(combined_results, rel_path, symlink_from_cwd=True)
+        stx.io.save(combined_results, rel_path)
 
     else:
         # Single benchmark mode
@@ -839,42 +842,8 @@ def parse_args() -> argparse.Namespace:
     return args
 
 
-def run_main() -> None:
-    """Initialize mngs framework, run main function, and cleanup."""
-    global CONFIG, CC, sys, plt
-
-    import sys
-
-    import matplotlib.pyplot as plt
-    import mngs
-
-    args = parse_args()
-
-    # Start mngs framework
-    CONFIG, sys.stdout, sys.stderr, plt, CC = mngs.gen.start(
-        sys,
-        plt,
-        args=args,
-        file=__FILE__,
-        sdir_suffix=None,
-        verbose=False,
-        agg=True,
-    )
-
-    # Main
-    exit_status = main(args)
-
-    # Close the mngs framework
-    mngs.gen.close(
-        CONFIG,
-        verbose=False,
-        notify=False,
-        message="",
-        exit_status=exit_status,
-    )
-
-
 if __name__ == "__main__":
-    run_main()
+    args = parse_args()
+    main(args)
 
 # EOF

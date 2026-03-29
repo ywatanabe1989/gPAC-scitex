@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # Timestamp: "2025-05-16 22:05:21 (ywatanabe)"
-# File: /ssh:sp:/home/ywatanabe/proj/gPAC/scripts/exp_02_tensorpac_comparison/compare_pac_values_gpac_only.py
+# File: ./scripts/exp_02_tensorpac_comparison/compare_pac_values_gpac_only.py
 # ----------------------------------------
 import os
-__FILE__ = (
-    "./scripts/exp_02_tensorpac_comparison/compare_pac_values_gpac_only.py"
-)
+
+import scitex as stx
+
+__FILE__ = os.path.abspath(__file__)
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
 
@@ -23,7 +24,7 @@ Dependencies:
     - NumPy
     - Matplotlib
     - scipy
-    - mngs
+    - scitex
 
 IO:
   - input-files:
@@ -53,7 +54,7 @@ warnings.filterwarnings("ignore", category=UserWarning)
 warnings.filterwarnings("ignore", category=FutureWarning)
 
 """Parameters"""
-# Will be loaded via mngs.io.load_configs() in run_main()
+# Will be loaded via stx.io.load_configs() in main()
 
 """Functions & Classes"""
 def load_synthetic_data(
@@ -405,7 +406,6 @@ def visualize_surrogate_distributions(
         print(
             f"Warning: Max PAC indices {max_idx} out of bounds for surrogate dist shape {surrogate_dist.shape}"
         )
-        # Use the first index as a fallback
         max_pha_idx = min(max_pha_idx, surrogate_dist.shape[0] - 1)
         max_amp_idx = min(max_amp_idx, surrogate_dist.shape[1] - 1)
 
@@ -430,7 +430,7 @@ def visualize_surrogate_distributions(
     ax6 = plt.subplot(grid[2, 0])
     ax6.hist(p_values.flatten(), bins=20, alpha=0.7)
     ax6.axvline(
-        0.05, color="r", linestyle="dashed", linewidth=2, label="α = 0.05"
+        0.05, color="r", linestyle="dashed", linewidth=2, label="alpha = 0.05"
     )
     ax6.set_title("Distribution of P-Values")
     ax6.set_xlabel("P-Value")
@@ -559,7 +559,7 @@ def run_analysis(args):
     significant = p_values < 0.05
 
     # Compute statistics
-    stats = analyze_surrogate_distributions(
+    dist_stats = analyze_surrogate_distributions(
         pac_values=pac_values_2d,
         surrogate_dist=surrogate_dist_3d,
         alpha=0.05,
@@ -585,11 +585,12 @@ def run_analysis(args):
         "p_values": p_values,
         "z_scores": z_scores,
         "significant": significant,
-        "stats": stats,
+        "stats": dist_stats,
         "fig": fig,
     }
 
 
+@stx.session
 def main(args):
     """Main function for analyzing PAC with surrogate distributions."""
     # Run analysis for specified number of trials
@@ -611,21 +612,16 @@ def main(args):
         else:
             avg_stats[key] = all_stats[0][key]
 
-    # Save results using mngs.io.save
-    import mngs
-
     # Save visualization from last trial
-    mngs.io.save(
+    stx.io.save(
         results["fig"],
         "./results/exp_02/pac_values/surrogate_distribution_visualization.png",
-        symlink_from_cwd=True,
     )
 
     # Save statistics
-    mngs.io.save(
+    stx.io.save(
         avg_stats,
         "./results/exp_02/pac_values/surrogate_distribution_stats.json",
-        symlink_from_cwd=True,
     )
 
     # Stack surrogate distributions across trials if available
@@ -640,10 +636,9 @@ def main(args):
         surrogate_stack = np.stack(all_surrogate_dists, axis=0)
 
         # Save surrogate distributions - convert to dictionary for npz format
-        mngs.io.save(
+        stx.io.save(
             {"surrogate_distributions": surrogate_stack},
             "./results/exp_02/pac_values/gpac_surrogate_distributions.npz",
-            symlink_from_cwd=True,
         )
 
     # Print summary statistics
@@ -661,7 +656,7 @@ def main(args):
         f"  Maximum PAC value: {avg_stats['max_pac_value']:.4f} (p={avg_stats['max_pac_p_value']:.4f}, z={avg_stats['max_pac_z_score']:.2f})"
     )
     print(
-        f"  Average z-score: {avg_stats['overall_z_score_mean']:.2f} ± {avg_stats['overall_z_score_std']:.2f}"
+        f"  Average z-score: {avg_stats['overall_z_score_mean']:.2f} +/- {avg_stats['overall_z_score_std']:.2f}"
     )
 
     plt.close(results["fig"])  # Close figure to free memory
@@ -757,42 +752,8 @@ def parse_args() -> argparse.Namespace:
     return args
 
 
-def run_main() -> None:
-    """Initialize mngs framework, run main function, and cleanup."""
-    global CONFIG, CC, sys, plt
-
-    import sys
-
-    import matplotlib.pyplot as plt
-    import mngs
-
-    args = parse_args()
-
-    # Start mngs framework
-    CONFIG, sys.stdout, sys.stderr, plt, CC = mngs.gen.start(
-        sys,
-        plt,
-        args=args,
-        file=__FILE__,
-        sdir_suffix=None,
-        verbose=False,
-        agg=True,
-    )
-
-    # Main
-    exit_status = main(args)
-
-    # Close the mngs framework
-    mngs.gen.close(
-        CONFIG,
-        verbose=False,
-        notify=False,
-        message="",
-        exit_status=exit_status,
-    )
-
-
 if __name__ == "__main__":
-    run_main()
+    args = parse_args()
+    main(args)
 
 # EOF

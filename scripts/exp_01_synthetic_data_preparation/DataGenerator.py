@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # Timestamp: "2025-05-17 15:18:21 (ywatanabe)"
-# File: /ssh:sp:/home/ywatanabe/proj/gPAC/scripts/exp_01_synthetic_data_preparation/DataGenerator.py
+# File: ./scripts/exp_01_synthetic_data_preparation/DataGenerator.py
 # ----------------------------------------
 import os
-__FILE__ = (
-    "./scripts/exp_01_synthetic_data_preparation/DataGenerator.py"
-)
+
+import scitex as stx
+
+__FILE__ = os.path.abspath(__file__)
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
 
@@ -451,6 +452,8 @@ class DataGenerator:
         Dict[str, SyntheticPACDataset]
             Dictionary containing train, val, and test datasets
         """
+        from .SyntheticPACDataset import SyntheticPACDataset
+
         # Convert data to torch tensors if needed
         signals_tensor = torch.tensor(data["signals"], dtype=torch.float32)
         labels_tensor = torch.tensor(data["class_labels"], dtype=torch.long)

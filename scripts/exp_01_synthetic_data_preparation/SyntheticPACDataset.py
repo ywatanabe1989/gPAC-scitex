@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # Timestamp: "2025-05-17 15:18:35 (ywatanabe)"
-# File: /ssh:sp:/home/ywatanabe/proj/gPAC/scripts/exp_01_synthetic_data_preparation/SyntheticPACDataset.py
+# File: ./scripts/exp_01_synthetic_data_preparation/SyntheticPACDataset.py
 # ----------------------------------------
 import os
-__FILE__ = (
-    "./scripts/exp_01_synthetic_data_preparation/SyntheticPACDataset.py"
-)
+
+import scitex as stx
+
+__FILE__ = os.path.abspath(__file__)
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
 

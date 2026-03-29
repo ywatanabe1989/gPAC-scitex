@@ -1,9 +1,13 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+# NOTE: This is a one-off utility script used during development.
+# It was used to add n_trials parameter to compare_pac_values.py.
+# Kept for historical reference only.
 """Update the compare_pac_values.py script to add n_trials parameter."""
 
 import re
 
-file_path = "/home/ywatanabe/proj/gPAC/scripts/exp_02_tensorpac_comparison/compare_pac_values.py"
+file_path = "./scripts/exp_02_tensorpac_comparison/compare_pac_values.py"
 
 with open(file_path, 'r') as f:
     content = f.read()
